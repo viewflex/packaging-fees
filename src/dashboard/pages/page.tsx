@@ -1,56 +1,147 @@
-import React, { type FC } from 'react';
-import { dashboard } from '@wix/dashboard';
-import {
-  Button,
-  EmptyState,
-  Image,
-  Page,
-  TextButton,
-  WixDesignSystemProvider,
-} from '@wix/design-system';
+import React, {type FC} from 'react';
+import {dashboard} from '@wix/dashboard';
+import {Button, Page, Text, WixDesignSystemProvider,} from '@wix/design-system';
 import '@wix/design-system/styles.global.css';
 import * as Icons from '@wix/wix-ui-icons-common';
-import wixLogo from './wix_logo.svg';
+import * as wixData from '@wix/data';
+
+let packagingFeesConfig: null|Object = null;
+const collectionId: string = 'PackagingFeesConfig';
+const collectionDisplayName: string = 'Packaging Fees Config';
+
+// Defaults
+let amount: number = 5.00;
+let currency: string = 'USD';
+let perItem: boolean = false;
+
+async function getPackagingFeesConfig(collectionId: string) {
+
+    return wixData.items.query(collectionId)
+        .find()
+        .then((results) => {
+            if (results.items.length > 0) {
+                const item = results.items[0]; // Assuming there is only one item
+
+                return {
+                    amount: item.amount,
+                    currency: item.currency,
+                    perItem: item.perItem
+                };
+
+            } else {
+                console.log("No items found in the collection.");
+                return null;
+            }
+        })
+        .catch((error) => {
+            console.error("Error querying collection:", error);
+            return null;
+        });
+}
+
+async function createNewCollection(collectionId: string, collectionDisplayName: string) {
+    try {
+        const collection = await wixData.collections.createDataCollection({
+            // @ts-ignore
+            _id: collectionId,
+            displayName: collectionDisplayName,
+            fields: [
+                {
+                    key: "amount",
+                    type: "NUMBER",
+                    numberRange: {
+                        max: 10000
+                    },
+                    displayName: "Amount"
+                },
+                {
+                    key: "currency",
+                    type: "TEXT",
+                    stringLengthRange: {
+                        maxLength: 3
+                    },
+                    displayName: "Currency"
+                },
+                {
+                    key: "perItem",
+                    type: "BOOLEAN",
+                    displayName: "Per Item"
+                }
+            ],
+            permissions: {
+                insert: 'ADMIN',
+                update: 'ADMIN',
+                remove: 'ADMIN',
+                read: 'ANYONE'
+            }
+        });
+
+        setTimeout(function(){
+            // Insert a single record into the collection.
+            const record = {
+                "amount": amount,
+                "currency": currency,
+                "perItem": perItem
+            };
+
+            const result = wixData.items.insert(collectionId, record);
+
+            setTimeout(function(){
+                if (result) {
+                    console.log("Record inserted successfully:", result);
+                } else {
+                    console.log("Failed to insert record.");
+                }
+            }, 1000);
+
+        }, 2000);
+
+        console.log('Collection created successfully', collection);
+    } catch (error) {
+        console.error('Failed to create collection:', error);
+    }
+}
 
 const Index: FC = () => {
   return (
     <WixDesignSystemProvider features={{ newColorsBranding: true }}>
       <Page>
         <Page.Header
-          title="Dashboard Page"
-          subtitle="Add management capabilities to your app."
-          actionsBar={
-            <Button
-              onClick={() => {
-                dashboard.showToast({
-                  message: 'Your first toast message!',
-                });
-              }}
-              prefixIcon={<Icons.GetStarted />}
-            >
-              Show a toast
-            </Button>
-          }
+          title="Packaging Fees"
+          subtitle="Supports adding packaging fee(s) to your store checkout."
         />
-        <Page.Content>
-          <EmptyState
-            image={
-              <Image fit="contain" height="100px" src={wixLogo} transparent />
-            }
-            title="Start editing this dashboard page"
-            subtitle="Learn how to work with dashboard pages and how to add functionality to them using Wix APIs."
-            theme="page"
-          >
-            <TextButton
-              as="a"
-              href="https://dev.wix.com/docs/build-apps/develop-your-app/frameworks/wix-cli/supported-extensions/dashboard-extensions/dashboard-pages/add-dashboard-page-extensions-with-the-cli#add-dashboard-page-extensions-with-the-cli"
-              target="_blank"
-              prefixIcon={<Icons.ExternalLink />}
-            >
-              Dashboard pages documentation
-            </TextButton>
-          </EmptyState>
-        </Page.Content>
+          <Page.Content>
+              <Text>
+                  Defaults: Amount: { amount }, Currency: { currency }, Per Item: { perItem.toString() }
+              </Text>
+
+              <Button
+                  onClick={async () => {
+                      packagingFeesConfig = await getPackagingFeesConfig(collectionId);
+                      console.log('packagingFeesConfig');
+                      console.log(packagingFeesConfig);
+
+                      setTimeout(function(){
+                          if (packagingFeesConfig === null) {
+                              // Create the collection
+                              console.log('creating collection...');
+                              createNewCollection(collectionId, collectionDisplayName);
+                              dashboard.showToast({
+                                  message: 'Collection created!',
+                              });
+                          } else {
+                              dashboard.showToast({
+                                  message: 'Collection already exists.',
+                              });
+                          }
+                      }, 2000);
+                  }}
+                  prefixIcon={<Icons.BoxOpen/>}
+              >
+                  Click to create the { collectionDisplayName } collection.
+              </Button>
+
+          </Page.Content>
       </Page>
     </WixDesignSystemProvider>
   );
