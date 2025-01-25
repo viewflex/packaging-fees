@@ -1,9 +1,10 @@
 import React, {type FC} from 'react';
 import {dashboard} from '@wix/dashboard';
-import {Button, Page, Text, WixDesignSystemProvider,} from '@wix/design-system';
+import {Button, Page, WixDesignSystemProvider,} from '@wix/design-system';
 import '@wix/design-system/styles.global.css';
 import * as Icons from '@wix/wix-ui-icons-common';
-import * as wixData from '@wix/data';
+// import * as wixData from '@wix/data';
+import {collections, items} from '@wix/data';
 
 let packagingFeesConfig: null|Object = null;
 const collectionId: string = 'PackagingFeesConfig';
@@ -16,7 +17,7 @@ let perItem: boolean = false;
 
 async function getPackagingFeesConfig(collectionId: string) {
 
-    return wixData.items.query(collectionId)
+    return items.query(collectionId)
         .find()
         .then((results) => {
             if (results.items.length > 0) {
@@ -41,7 +42,7 @@ async function getPackagingFeesConfig(collectionId: string) {
 
 async function createNewCollection(collectionId: string, collectionDisplayName: string) {
     try {
-        const collection = await wixData.collections.createDataCollection({
+        const collection = await collections.createDataCollection({
             // @ts-ignore
             _id: collectionId,
             displayName: collectionDisplayName,
@@ -84,7 +85,7 @@ async function createNewCollection(collectionId: string, collectionDisplayName: 
                 "perItem": perItem
             };
 
-            const result = wixData.items.insert(collectionId, record);
+            const result = items.insert(collectionId, record);
 
             setTimeout(function(){
                 if (result) {
@@ -108,12 +109,9 @@ const Index: FC = () => {
       <Page>
         <Page.Header
           title="Packaging Fees"
-          subtitle="Supports adding packaging fee(s) to your store checkout."
+          subtitle="Supports adding packaging fees to your store checkout."
         />
           <Page.Content>
-              <Text>
-                  Defaults: Amount: { amount }, Currency: { currency }, Per Item: { perItem.toString() }
-              </Text>
 
               <Button
                   onClick={async () => {
@@ -138,7 +136,7 @@ const Index: FC = () => {
                   }}
                   prefixIcon={<Icons.BoxOpen/>}
               >
-                  Click to create the { collectionDisplayName } collection.
+                  Create the { collectionDisplayName } collection with defaults - amount: { amount }, currency: { currency }, perItem: { perItem.toString() }.
               </Button>
 
           </Page.Content>

@@ -1,18 +1,16 @@
 import { additionalFees } from "@wix/ecom/service-plugins";
-import * as wixData from '@wix/data';
+import { items } from '@wix/data';
 
 additionalFees.provideHandlers({
   calculateAdditionalFees: async (payload) => {
     const { request, metadata } = payload;
     // Use the `request` and `metadata` received from Wix and apply custom logic.
 
-    const packagingFeesConfig = await getPackagingFeesConfig();
-    console.log('packagingFeesConfig');
-    console.log(packagingFeesConfig);
-
     let lineItems = request.lineItems;
     let additionalFees = [];
     let packagingFeesTotal = 0;
+
+    const packagingFeesConfig = await getPackagingFeesConfig();
 
     if ((packagingFeesConfig !== null) && (packagingFeesConfig.amount > 0) && (lineItems !== undefined) && (lineItems.length > 0)) {
       packagingFeesTotal = packagingFeesConfig.perItem ? packagingFeesConfig.amount * lineItems.length : packagingFeesConfig.amount;
@@ -38,7 +36,7 @@ additionalFees.provideHandlers({
 
 async function getPackagingFeesConfig() {
 
-  return wixData.items.query("PackagingFeesConfig")
+  return items.query("PackagingFeesConfig")
       .find()
       .then((results) => {
         if (results.items.length > 0) {
