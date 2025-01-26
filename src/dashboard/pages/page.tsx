@@ -1,10 +1,9 @@
-import React, {type FC} from 'react';
-import {dashboard} from '@wix/dashboard';
-import {Button, Page, WixDesignSystemProvider,} from '@wix/design-system';
+import React, { type FC } from 'react';
+import { dashboard } from '@wix/dashboard';
+import { Button, Page, WixDesignSystemProvider } from '@wix/design-system';
 import '@wix/design-system/styles.global.css';
 import * as Icons from '@wix/wix-ui-icons-common';
-// import * as wixData from '@wix/data';
-import {collections, items} from '@wix/data';
+import { collections, items } from '@wix/data';
 
 let packagingFeesConfig: null|Object = null;
 const collectionId: string = 'PackagingFeesConfig';
@@ -21,7 +20,7 @@ async function getPackagingFeesConfig(collectionId: string) {
         .find()
         .then((results) => {
             if (results.items.length > 0) {
-                const item = results.items[0]; // Assuming there is only one item
+                const item = results.items[0];
 
                 return {
                     amount: item.amount,
@@ -78,7 +77,6 @@ async function createNewCollection(collectionId: string, collectionDisplayName: 
         });
 
         setTimeout(function(){
-            // Insert a single record into the collection.
             const record = {
                 "amount": amount,
                 "currency": currency,

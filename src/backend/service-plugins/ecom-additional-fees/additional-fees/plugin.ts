@@ -4,7 +4,6 @@ import { items } from '@wix/data';
 additionalFees.provideHandlers({
   calculateAdditionalFees: async (payload) => {
     const { request, metadata } = payload;
-    // Use the `request` and `metadata` received from Wix and apply custom logic.
 
     let lineItems = request.lineItems;
     let additionalFees = [];
@@ -12,8 +11,13 @@ additionalFees.provideHandlers({
 
     const packagingFeesConfig = await getPackagingFeesConfig();
 
-    if ((packagingFeesConfig !== null) && (packagingFeesConfig.amount > 0) && (lineItems !== undefined) && (lineItems.length > 0)) {
-      packagingFeesTotal = packagingFeesConfig.perItem ? packagingFeesConfig.amount * lineItems.length : packagingFeesConfig.amount;
+    if ((packagingFeesConfig !== null) &&
+        (packagingFeesConfig.amount > 0) &&
+        (lineItems !== undefined) &&
+        (lineItems.length > 0)) {
+      packagingFeesTotal = packagingFeesConfig.perItem ?
+          packagingFeesConfig.amount * lineItems.length :
+          packagingFeesConfig.amount;
     }
 
     if (packagingFeesTotal > 0) {
@@ -29,7 +33,9 @@ additionalFees.provideHandlers({
 
     return {
       additionalFees: additionalFees,
-      currency: packagingFeesConfig !== null ? packagingFeesConfig.currency : 'USD'
+      currency: packagingFeesConfig !== null ?
+          packagingFeesConfig.currency :
+          'USD'
     };
   },
 });
@@ -40,7 +46,7 @@ async function getPackagingFeesConfig() {
       .find()
       .then((results) => {
         if (results.items.length > 0) {
-          const item = results.items[0]; // Assuming there is only one item
+          const item = results.items[0];
 
           return {
             amount: <number> item.amount,
